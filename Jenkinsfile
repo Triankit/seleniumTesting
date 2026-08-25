@@ -16,7 +16,7 @@ pipeline {
         stage('Check Application') {
             steps {
                 bat '''
-                    curl -f http://http://localhost/opencart/upload/
+                    curl -f http://localhost/opencart/upload/
                 '''
             }
         }
