@@ -13,6 +13,14 @@ pipeline {
             }
         }
 
+        stage('Check Application') {
+            steps {
+                bat '''
+                    curl -f http://http://localhost/opencart/upload/
+                '''
+            }
+        }
+
         stage('Run Selenium Tests') {
             steps {
                 bat 'mvn clean test'
@@ -30,7 +38,7 @@ pipeline {
         }
 
         failure {
-            echo 'Selenium tests failed.'
+            echo 'Pipeline failed.'
         }
     }
 }
