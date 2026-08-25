@@ -1,11 +1,16 @@
 package testCases;
 
 import testBase.BaseClass;
+
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.Assert;
 
 import pageObjects.HomePage;
+import utilities.ExtentReportListener;
 
+
+@Listeners(ExtentReportListener.class)
 public class AccountRegistrationTest extends BaseClass {
 	
 	@Test
