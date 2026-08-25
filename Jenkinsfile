@@ -30,7 +30,10 @@ pipeline {
 
     post {
         always {
-            echo 'Test execution completed.'
+            echo 'Publishing test results...'
+
+            junit testResults: 'target/surefire-reports/*.xml',
+                  allowEmptyResults: false
         }
 
         success {
@@ -38,7 +41,7 @@ pipeline {
         }
 
         failure {
-            echo 'Pipeline failed.'
+            echo 'Selenium tests failed.'
         }
     }
 }
