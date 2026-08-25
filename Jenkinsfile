@@ -13,13 +13,13 @@ pipeline {
             }
         }
 
-        stage('Check Application') {
-            steps {
-                bat '''
-                    curl -f http://localhost/opencart/upload/
-                '''
-            }
-        }
+	stage('Check Application') {
+	    steps {
+	        bat '''
+	            curl -fsS -o NUL http://localhost/opencart/upload/
+	        '''
+	    }
+	}
 
         stage('Run Selenium Tests') {
             steps {
