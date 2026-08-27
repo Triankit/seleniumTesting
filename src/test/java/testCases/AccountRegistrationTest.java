@@ -18,19 +18,15 @@ public class AccountRegistrationTest extends BaseClass {
 
     HomePage hp = new HomePage(driver);
 
-    // Step 1
     hp.clickOnMyAccountDrp();
 
     ExtentReportListener.getTest()
             .pass("Click My Account");
 
-    // Step 2
     hp.selectRegisterOptn();
 
     ExtentReportListener.getTest()
             .pass("Select Register option");
-
-    // Step 3
     String getTitle = driver.getTitle();
 
     Assert.assertEquals(
