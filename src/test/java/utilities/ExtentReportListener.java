@@ -1,6 +1,8 @@
 package utilities;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -23,7 +25,13 @@ import testBase.BaseClass;
 public class ExtentReportListener implements ITestListener {
 
     private static ExtentReports extent;
+
     private static ThreadLocal<ExtentTest> test = new ThreadLocal<>();
+
+    // Allows test classes to log individual steps
+    public static ExtentTest getTest() {
+        return test.get();
+    }
 
     @Override
     public void onStart(ITestContext context) {
@@ -46,48 +54,63 @@ public class ExtentReportListener implements ITestListener {
 
         // Report design
         sparkReporter.config().setTheme(Theme.STANDARD);
-        sparkReporter.config().setDocumentTitle("OpenCart Automation Report");
-        sparkReporter.config().setReportName("OpenCart Selenium Test Execution Report");
-        sparkReporter.config().setTimeStampFormat("MMM dd, yyyy HH:mm:ss");
+        sparkReporter.config().setDocumentTitle(
+                "OpenCart Automation Report");
+
+        sparkReporter.config().setReportName(
+                "OpenCart Selenium Test Execution Report");
+
+        sparkReporter.config().setTimeStampFormat(
+                "MMM dd, yyyy HH:mm:ss");
 
         extent = new ExtentReports();
 
         extent.attachReporter(sparkReporter);
 
-        // System information
-        extent.setSystemInfo("Operating System",
+        // Environment information
+        extent.setSystemInfo(
+                "Operating System",
                 System.getProperty("os.name"));
 
-        extent.setSystemInfo("OS Version",
+        extent.setSystemInfo(
+                "OS Version",
                 System.getProperty("os.version"));
 
-        extent.setSystemInfo("Java Version",
+        extent.setSystemInfo(
+                "Java Version",
                 System.getProperty("java.version"));
 
-        extent.setSystemInfo("User",
+        extent.setSystemInfo(
+                "User",
                 System.getProperty("user.name"));
 
-        extent.setSystemInfo("Environment",
+        extent.setSystemInfo(
+                "Environment",
                 "QA");
     }
 
     @Override
     public void onTestStart(ITestResult result) {
 
-        String testName = result.getMethod().getMethodName();
+        String testName =
+                result.getMethod().getMethodName();
 
-        String className = result.getTestClass()
-                .getName();
+        String className =
+                result.getTestClass().getName();
 
-        String suiteName = result.getTestContext()
-                .getName();
+        String suiteName =
+                result.getTestContext().getName();
 
         ExtentTest extentTest =
                 extent.createTest(testName);
 
         extentTest.assignCategory(className);
-        extentTest.info("Test Class: " + className);
-        extentTest.info("Test Suite: " + suiteName);
+
+        extentTest.info(
+                "Test Class: " + className);
+
+        extentTest.info(
+                "Test Suite: " + suiteName);
 
         test.set(extentTest);
     }
@@ -95,10 +118,8 @@ public class ExtentReportListener implements ITestListener {
     @Override
     public void onTestSuccess(ITestResult result) {
 
-        test.get().log(
-                Status.PASS,
-                "Test Passed Successfully"
-        );
+        test.get().pass(
+                "Test Passed Successfully");
 
         extent.flush();
     }
@@ -106,21 +127,19 @@ public class ExtentReportListener implements ITestListener {
     @Override
     public void onTestFailure(ITestResult result) {
 
-        test.get().log(
-                Status.FAIL,
-                "Test Failed"
-        );
+        test.get().fail(
+                "Test Failed");
 
-        // Add exception details
+        // Add exception
         if (result.getThrowable() != null) {
 
             test.get().fail(
-                    result.getThrowable()
-            );
+                    result.getThrowable());
         }
 
-        // Take screenshot
-        String screenshotPath = captureScreenshot(result);
+        // Capture screenshot
+        String screenshotPath =
+                captureScreenshot(result);
 
         if (screenshotPath != null) {
 
@@ -131,15 +150,13 @@ public class ExtentReportListener implements ITestListener {
                         MediaEntityBuilder
                                 .createScreenCaptureFromPath(
                                         screenshotPath)
-                                .build()
-                );
+                                .build());
 
             } catch (Exception e) {
 
                 test.get().warning(
                         "Unable to attach screenshot: "
-                                + e.getMessage()
-                );
+                                + e.getMessage());
             }
         }
 
@@ -149,16 +166,13 @@ public class ExtentReportListener implements ITestListener {
     @Override
     public void onTestSkipped(ITestResult result) {
 
-        test.get().log(
-                Status.SKIP,
-                "Test Skipped"
-        );
+        test.get().skip(
+                "Test Skipped");
 
         if (result.getThrowable() != null) {
 
             test.get().skip(
-                    result.getThrowable()
-            );
+                    result.getThrowable());
         }
 
         extent.flush();
@@ -170,13 +184,17 @@ public class ExtentReportListener implements ITestListener {
         if (extent != null) {
             extent.flush();
         }
+
+        test.remove();
     }
 
-    private String captureScreenshot(ITestResult result) {
+    private String captureScreenshot(
+            ITestResult result) {
 
         try {
 
-            Object testInstance = result.getInstance();
+            Object testInstance =
+                    result.getInstance();
 
             if (!(testInstance instanceof BaseClass)) {
                 return null;
@@ -207,7 +225,7 @@ public class ExtentReportListener implements ITestListener {
 
             String timestamp =
                     new SimpleDateFormat(
-                            "yyyyMMdd_HHmmss")
+                            "yyyyMMdd_HHmmss_SSS")
                             .format(new Date());
 
             String screenshotName =
@@ -217,19 +235,20 @@ public class ExtentReportListener implements ITestListener {
                             + timestamp
                             + ".png";
 
-            String screenshotPath =
-                    screenshotDirectory
-                            + File.separator
-                            + screenshotName;
+            File destination =
+                    new File(
+                            screenshotDirectory,
+                            screenshotName);
 
-            File screenshotFile =
+            File source =
                     ((TakesScreenshot) driver)
                             .getScreenshotAs(
                                     OutputType.FILE);
 
-            screenshotFile.renameTo(
-                    new File(screenshotPath)
-            );
+            Files.copy(
+                    source.toPath(),
+                    destination.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
 
             // Relative path from ExtentReport.html
             return "screenshots/"
@@ -237,10 +256,12 @@ public class ExtentReportListener implements ITestListener {
 
         } catch (Exception e) {
 
-            test.get().warning(
-                    "Screenshot capture failed: "
-                            + e.getMessage()
-            );
+            if (test.get() != null) {
+
+                test.get().warning(
+                        "Screenshot capture failed: "
+                                + e.getMessage());
+            }
 
             return null;
         }
