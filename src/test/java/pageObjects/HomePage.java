@@ -1,6 +1,8 @@
 package pageObjects;
 import java.time.Duration;
 
+import org.jspecify.annotations.Nullable;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -68,9 +70,10 @@ public class HomePage extends BasePage {
 	
 	
 	public void acceptPrivacyPolicy() {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		js.executeScript("arguments[0].scrollIntoView(true);", chkPrivacyPolicy);
+		chkPrivacyPolicy.click();					
 
-		wait.until(ExpectedConditions.elementToBeClickable(chkPrivacyPolicy)).click();
 	}
 	
 	public void clickContinue() {
