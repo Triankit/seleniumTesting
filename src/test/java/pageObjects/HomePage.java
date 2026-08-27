@@ -1,7 +1,11 @@
 package pageObjects;
+import java.time.Duration;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.Factory;
 
 public class HomePage extends BasePage {
@@ -64,7 +68,9 @@ public class HomePage extends BasePage {
 	
 	
 	public void acceptPrivacyPolicy() {
-		chkPrivacyPolicy.click();
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+		wait.until(ExpectedConditions.elementToBeClickable(chkPrivacyPolicy)).click();
 	}
 	
 	public void clickContinue() {
